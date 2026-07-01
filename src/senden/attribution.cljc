@@ -26,12 +26,41 @@
   [touches]
   (reduce (fn [acc t] (update acc (:campaign t) (fnil + 0) 1)) {} touches))
 
+(declare time-decay-attribution)
+
 (defn attribute
-  "Attribution by model: :first, :last, :linear, :multi. Returns {campaign → weight/credit}."
+  "Attribution by model: :first, :last, :linear, :multi, :time-decay. Returns
+  {campaign → weight/credit}."
   [model touches]
   (case model
     :first  (let [t (first-touch touches)] (if t {(:campaign t) 1.0} {}))
     :last   (let [t (last-touch touches)]  (if t {(:campaign t) 1.0} {}))
     :linear (linear-attribution touches)
     :multi  (multi-touch-credits touches)
+    :time-decay (time-decay-attribution touches)
     {}))
+
+(defn time-decay-attribution
+  "Time-decay attribution: more recent touches get more credit. Weight of touch
+  i = decay^(i from end) where decay ∈ (0,1] (default 0.5). The last touch gets
+  weight 1, the second-to-last decay, etc. Returns {campaign → summed weight},
+  then normalized so all weights sum to 1."
+  ([touches]
+   (time-decay-attribution touches 0.5))
+  ([touches decay]
+   (let [sorted (sort-by :timestamp touches)
+         n (count sorted)]
+     (if (zero? n)
+       {}
+       (let [weighted (map-indexed
+                       (fn [idx t]
+                         ;; distance from the end (0 = last touch)
+                         (let [dist (- n 1 idx)
+                               w (Math/pow decay dist)]
+                           [(:campaign t) w]))
+                       sorted)
+             summed (reduce (fn [acc [c w]] (update acc c (fnil + 0) w)) {} weighted)
+             total (reduce + 0 (vals summed))]
+         (if (pos? total)
+           (reduce-kv (fn [acc c w] (assoc acc c (/ w total))) {} summed)
+           summed))))))
