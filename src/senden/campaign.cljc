@@ -101,3 +101,58 @@
                    :variants (count variants)
                    :winner-conversions (:conversions winner 0)}}
           opts)))
+
+;; ---------------------------------------------------------------------------
+;; budget management (burn-rate, remaining, overspend detection)
+;; ---------------------------------------------------------------------------
+
+(defn budget-remaining
+  "Remaining budget = budget - spend. Returns 0 if overspent (clamped)."
+  [c]
+  (let [budget (get-in c [:budget] 0)
+        spend (get-in c [:metrics :spend] 0)]
+    (max 0 (- budget spend))))
+
+(defn budget-overspent?
+  "True if spend exceeds the campaign's budget."
+  [c]
+  (> (get-in c [:metrics :spend] 0) (get-in c [:budget] 0)))
+
+(defn burn-rate
+  "Fraction of budget consumed = spend / budget (0.0–1.0+). Returns nil if
+  budget is 0."
+  [c]
+  (let [budget (get-in c [:budget] 0)]
+    (when (pos? budget)
+      (/ (get-in c [:metrics :spend] 0) budget))))
+
+(defn budget-pct
+  "Budget consumed as a percentage (0–100+). nil if no budget."
+  [c]
+  (when-let [r (burn-rate c)]
+    (* r 100)))
+
+(defn projected-spend
+  "Project total spend at the current rate given elapsed/total days.
+  Returns {:projected-spend :would-overspend?}."
+  [c elapsed-days total-days]
+  (let [spend (get-in c [:metrics :spend] 0)
+        daily (if (pos? elapsed-days) (/ spend elapsed-days) 0)
+        projected (* daily (max 1 total-days))
+        budget (get-in c [:budget] 0)]
+    {:projected-spend (long projected)
+     :daily-rate (long daily)
+     :would-overspend? (> projected budget)}))
+
+(defn budget-activity
+  "Build a ledger activity for a budget status check (kind :budget-check)."
+  [c opts]
+  (ledger/activity
+   (merge {:lane :marketing :kind :budget-check
+           :title (str "Budget check: " (:name c "campaign"))
+           :props {:campaign-id (:id c)
+                   :budget (get-in c [:budget] 0)
+                   :spend (get-in c [:metrics :spend] 0)
+                   :remaining (budget-remaining c)
+                   :overspent (budget-overspent? c)}}
+          opts)))
