@@ -54,3 +54,50 @@
                    :spend (get-in c [:metrics :spend] 0)
                    :conversions (get-in c [:metrics :conversions] 0)}}
           opts)))
+
+;; ---------------------------------------------------------------------------
+;; A/B test variants + winner selection
+;; ---------------------------------------------------------------------------
+
+(defrecord Variant [id name spend conversions impressions])
+
+(defn variant [m] (merge {:spend 0 :conversions 0 :impressions 0} m))
+
+(defn variant-cvr
+  "Conversion rate = conversions / impressions (nil if no impressions)."
+  [v]
+  (let [i (:impressions v 0)]
+    (when (pos? i) (/ (:conversions v 0) i))))
+
+(defn variant-cpa
+  "CPA = spend / conversions (nil if no conversions)."
+  [v]
+  (let [conv (:conversions v 0)]
+    (when (pos? conv) (/ (:spend v 0) conv))))
+
+(defn pick-winner
+  "Select the winning variant by :conversions (highest). Ties → first. Returns
+  nil if no variants have conversions."
+  [variants]
+  (let [with-conv (filter #(pos? (:conversions % 0)) variants)]
+    (when (seq with-conv)
+      (first (sort-by #(get-in % [:conversions] 0) > with-conv)))))
+
+(defn pick-winner-by-cpa
+  "Select the winning variant by lowest CPA. nil if no variant has conversions."
+  [variants]
+  (let [with-conv (filter #(pos? (:conversions % 0)) variants)]
+    (when (seq with-conv)
+      (first (sort-by variant-cpa with-conv)))))
+
+(defn ab-test-activity
+  "Project an A/B test winner selection onto chobo.ledger (lane :marketing,
+  kind :ab-test)."
+  [winner variants opts]
+  (ledger/activity
+   (merge {:lane :marketing :kind :ab-test
+           :title (str "A/B winner: " (:name winner "unknown"))
+           :props {:winner-id (:id winner)
+                   :variants (count variants)
+                   :winner-conversions (:conversions winner 0)}}
+          opts)))
