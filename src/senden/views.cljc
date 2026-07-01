@@ -24,4 +24,4 @@
   [:div {:class (class-name :senden)}
    [:h1 "Marketing"]
    (into [:section] (map campaign-card (:campaigns db [])))
-   [funnel-bar (:funnel db)]])
+   (funnel-bar (:funnel db))])
