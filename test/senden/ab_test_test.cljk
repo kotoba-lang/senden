@@ -1,6 +1,6 @@
 (ns senden.ab-test-test
   "A/B test variants + winner selection."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [senden.campaign :as c]))
 
 (def v1 (c/variant {:id "v1" :name "Version A" :spend 5000 :conversions 15 :impressions 1000}))

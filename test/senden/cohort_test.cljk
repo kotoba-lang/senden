@@ -1,6 +1,6 @@
 (ns senden.cohort-test
   "Cohort retention + churn + LTV estimate."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [senden.funnel :as f]
             [chobo.ledger :as ledger]))
 

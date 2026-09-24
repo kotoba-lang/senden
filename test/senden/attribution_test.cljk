@@ -1,5 +1,5 @@
 (ns senden.attribution-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [senden.attribution :as a]))
 
 (def touches [(a/touch {:channel :social :campaign "c1" :timestamp 1})
