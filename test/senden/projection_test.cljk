@@ -1,6 +1,6 @@
 (ns senden.projection-test
   "Cross-domain: mise.order → senden attribution."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [senden.projection :as proj]
             [senden.attribution :as attr]
             [senden.campaign :as campaign]))

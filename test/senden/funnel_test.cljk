@@ -1,5 +1,5 @@
 (ns senden.funnel-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [senden.funnel :as f]))
 
 (deftest funnel-test

@@ -1,6 +1,6 @@
 (ns senden.channel-test
   "Channel model: reach, cost (CPM), expected conversions/CPA, best-channel."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [senden.channel :as ch]))
 
 (def social (ch/channel {:id :social :name "Social Ads" :reach 50000 :cost-per-1k-impressions 500 :conversion-rate 0.02}))

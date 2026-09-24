@@ -1,7 +1,7 @@
 (ns senden.ledger-roundtrip-test
   "Verifies the senden → chobo.ledger round-trip: a campaign activity is built,
   appended to a ledger, and queryable."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [senden.campaign :as campaign]
             [chobo.ledger :as ledger]))
 

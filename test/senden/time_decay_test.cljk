@@ -1,6 +1,6 @@
 (ns senden.time-decay-test
   "Time-decay attribution: more recent touches get more credit."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [senden.attribution :as a]))
 
 (def touches [(a/touch {:channel :social :campaign "c1" :timestamp 1})

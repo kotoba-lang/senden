@@ -1,6 +1,6 @@
 (ns senden.ssr-test
   "SSR parity: senden.views render to stable HTML via shitsuke.hiccup/->html."
-  (:require [kotoba.lang.text] [clojure.test :refer [deftest is]]
+  (:require [kotoba.lang.text] [kotoba.test :refer [deftest is]]
             [shitsuke.hiccup :as hic]
             [senden.ssr :as ssr]
             [senden.views :as views]))

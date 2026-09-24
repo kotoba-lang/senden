@@ -1,6 +1,6 @@
 (ns senden.budget-test
   "Budget management: remaining, overspend, burn-rate, projection."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [senden.campaign :as c]))
 
 (def camp (-> (c/campaign {:id "c1" :name "Spring" :channel :social :budget 50000})
